@@ -183,7 +183,7 @@
   .detail-wrap{ padding:0 0 26px; }
   .detail-bar{ height:5px; }
   .detail-inner{ padding:22px 22px 0; }
-  .detail-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--line); }
+  .detail-top{ display:flex; flex-direction:column; gap:12px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--line); }
   .detail-time{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--muted); margin:0 0 6px;}
   .detail-title{ font-weight:800; font-size:21px; margin:0; color:var(--ink); line-height:1.4; letter-spacing:-.3px;}
   .back-btn{ flex:0 0 auto; background:none; border:1px solid var(--line); color:var(--ink); font-size:12px; font-weight:600; padding:7px 12px; border-radius:999px; cursor:pointer; font-family:inherit; }
@@ -196,7 +196,7 @@
   .li-text{ flex:1; }
   .li-hint{ flex:0 0 auto; font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; }
   .room-list li{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
-  .detail-top-actions{ display:flex; align-items:center; gap:8px; flex:0 0 auto; flex-wrap:wrap; justify-content:flex-end; }
+  .detail-top-actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-start; }
   .room-settings-btn{ white-space:nowrap; }
   .room-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .room-text{ flex:1; }
@@ -324,7 +324,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span class="version-tag">v4.4</span>
+      <span class="version-tag">v4.6</span>
       <button class="gear-btn" id="settingsBtn" aria-label="환경설정" title="환경설정">⚙</button>
     </div>
   </div>
@@ -3083,7 +3083,7 @@ function renderSupervisorSettings(){
 /* 아래 두 값을 채워두면, 새로고침하거나 다른 기기에서 파일을 열어도
    그대로 유지된 채 배포됩니다. 값이 없으면 설정 화면에서 입력한 내용이
    그 브라우저 탭에서만 유지됩니다. */
-const DEFAULT_MUSIC_URL = "https://youtu.be/Clil6fx2fjY?si=kBI_aMiTnQ1CShcw";
+const DEFAULT_MUSIC_URL = "https://youtu.be/4Ak9FCFYEks?si=dhZrYfMRZZQ_XMej";
 const DEFAULT_QR_URL = "https://joyful-haupia-d5e74c.netlify.app/";
 const DEFAULT_ROOMS = {
 };
