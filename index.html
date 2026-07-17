@@ -151,6 +151,17 @@
   .face{ position:absolute; inset:0 0 auto 0; backface-visibility:hidden; background:var(--card); border-radius:18px; overflow:visible; box-shadow:0 24px 50px rgba(20,24,16,.28); }
   .face-back{ transform:rotateY(180deg); }
 
+  .page-turn-overlay{
+    position:absolute; top:0; left:0; right:0;
+    background:var(--card); border-radius:18px; overflow:hidden;
+    z-index:8; transform-origin:left center; backface-visibility:hidden;
+    transition:transform .6s cubic-bezier(.45,.05,.35,1), box-shadow .6s ease;
+    pointer-events:none;
+  }
+  .page-turn-overlay.backward{ transform-origin:right center; }
+  .page-turn-overlay.turning{ transform:rotateY(-150deg); box-shadow:-20px 0 34px rgba(20,24,16,.28); }
+  .page-turn-overlay.backward.turning{ transform:rotateY(150deg); box-shadow:20px 0 34px rgba(20,24,16,.28); }
+
   .stub-list{ padding:14px; display:flex; flex-direction:column; gap:10px; }
   .stub{
     display:flex; align-items:center; gap:14px; background:#FFFDF8; border:1px solid var(--line);
@@ -313,7 +324,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span class="version-tag">v4.3</span>
+      <span class="version-tag">v4.4</span>
       <button class="gear-btn" id="settingsBtn" aria-label="환경설정" title="환경설정">⚙</button>
     </div>
   </div>
@@ -2804,6 +2815,7 @@ const ROOM_OVERRIDES = {};
 
 const dayTabsEl = document.getElementById('dayTabs');
 const stubListEl = document.getElementById('stubList');
+const listFaceEl = document.getElementById('listFace');
 const detailFaceEl = document.getElementById('detailFace');
 const flipCardEl = document.getElementById('flipCard');
 const supervisorListEl = document.getElementById('supervisorList');
@@ -2824,13 +2836,36 @@ function renderTabs(){
     </button>
   `).join('');
   dayTabsEl.querySelectorAll('.day-tab').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      if(flipCardEl.classList.contains('flipped')) flipCardEl.classList.remove('flipped');
-      currentDay = btn.dataset.day;
-      renderTabs();
-      renderStubs();
-    });
+    btn.addEventListener('click', ()=> changeDay(btn.dataset.day));
   });
+}
+
+function changeDay(newDayId){
+  if(newDayId === currentDay) return;
+  if(flipCardEl.classList.contains('flipped')) flipCardEl.classList.remove('flipped');
+
+  const oldIndex = DAYS.findIndex(d=>d.id===currentDay);
+  const newIndex = DAYS.findIndex(d=>d.id===newDayId);
+  const forward = newIndex > oldIndex;
+
+  const oldHeight = stubListEl.getBoundingClientRect().height;
+  const overlay = document.createElement('div');
+  overlay.className = 'page-turn-overlay' + (forward ? '' : ' backward');
+  overlay.style.height = oldHeight + 'px';
+  const clone = stubListEl.cloneNode(true);
+  clone.removeAttribute('id');
+  overlay.appendChild(clone);
+  listFaceEl.appendChild(overlay);
+
+  currentDay = newDayId;
+  renderTabs();
+  renderStubs();
+
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=> overlay.classList.add('turning'));
+  });
+  overlay.addEventListener('transitionend', ()=> overlay.remove(), { once:true });
+  setTimeout(()=>{ if(overlay.parentNode) overlay.remove(); }, 900); // 안전장치
 }
 
 function renderStubs(){
