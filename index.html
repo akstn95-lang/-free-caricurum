@@ -182,7 +182,9 @@
   .detail-list li{ font-size:13px; color:var(--ink); padding:8px 12px; border-radius:10px; margin-bottom:6px; background:var(--neu-bg); }
   .detail-list li.clickable{ cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px; transition:background .15s ease; }
   .detail-list li.clickable:hover{ background:#E2DDC9; }
+  .li-text{ flex:1; }
   .li-hint{ flex:0 0 auto; font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; }
+  .room-list li{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
   .detail-top-actions{ display:flex; align-items:center; gap:8px; flex:0 0 auto; flex-wrap:wrap; justify-content:flex-end; }
   .room-settings-btn{ white-space:nowrap; }
   .room-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
@@ -311,7 +313,7 @@
       </div>
     </div>
     <div class="header-right">
-      <span class="version-tag">v4.1</span>
+      <span class="version-tag">v4.2</span>
       <button class="gear-btn" id="settingsBtn" aria-label="환경설정" title="환경설정">⚙</button>
     </div>
   </div>
@@ -2752,8 +2754,8 @@ const TAG_STYLES = {
 
 const DAYS = [
   { id:'d1', label:'7.20 월', sub:'1일차', periods:[
-    { time:'1교시', tag:'선택수업', title:'AI 융합독서 탐구수업 · 1차시', meta:'선택한 교실로 이동',
-      list:['1. 문학작품으로 만나는 인간과 AI · 여인구 · 1반','2. AI 바이브코딩과 수학 · 백문수 · 2반','3. AI미래 기업설계 프로젝트 · 강민욱, 김진홍 · 3반','4. AI융합 반도체 8대공정, 진로탐색 · 이경서 · 4반','5. AI 융합 과학적 사회문제해결 프로젝트 · 유은미 · 5반','6. AI와 함께하는 미술수업 · 오유경 · 6반','7. AI 활용 미래 자서전 만들기 · 김형아, 이건웅 · 7반','8. AI로 만드는 나만의 일본여행 계획서 · 양국모 · 8반','9. AI 미래과학 발명연구 · 김다은 · 선택2실','10. AI 수학 노래만들기 · 배현민, 박선호 · 선택3실'],
+    { time:'1교시', tag:'선택수업', title:'AI 융합독서 탐구수업 · 1차시', meta:'선택한 교실로 이동', roomEditable:true,
+      list:['1. 문학작품으로 만나는 인간과 AI · 여인구','2. AI 바이브코딩과 수학 · 백문수','3. AI미래 기업설계 프로젝트 · 강민욱, 김진홍','4. AI융합 반도체 8대공정, 진로탐색 · 이경서','5. AI 융합 과학적 사회문제해결 프로젝트 · 유은미','6. AI와 함께하는 미술수업 · 오유경','7. AI 활용 미래 자서전 만들기 · 김형아, 이건웅','8. AI로 만드는 나만의 일본여행 계획서 · 양국모','9. AI 미래과학 발명연구 · 김다은','10. AI 수학 노래만들기 · 배현민, 박선호],
       note:'선택한 강좌의 교실로 이동해 1차시를 진행합니다.' },
     { time:'2교시', tag:'보건', title:'자기 교실 복귀 · 흉부 엑스레이 촬영', meta:'보건실 담당 · 이하진 선생님' },
     { time:'3교시', tag:'선택수업', title:'AI 융합독서 탐구수업 · 2차시', meta:'1~8교실, 선택2·3실' },
@@ -2871,24 +2873,23 @@ function openDetail(dayId, idx){
   const s = TAG_STYLES[p.tag] || TAG_STYLES['학급활동'];
 
   let listHtml = '';
-  if(p.list && p.roomEditable){
-    listHtml = `<ul class="detail-list room-list" id="roomList">${p.list.map((li,dIdx)=>{
-      const rKey = dayId + '-' + idx + '-' + dIdx;
-      const room = ROOM_OVERRIDES[rKey] || '';
-      return `<li class="room-row">
-        <span class="room-text">${li}</span>
-        <span class="room-display">${room || '강의실 미정'}</span>
-        <input class="room-input" data-key="${rKey}" value="${room}" placeholder="강의실 입력">
-      </li>`;
-    }).join('')}</ul>`;
-  } else if(p.list){
-    listHtml = `<ul class="detail-list">${p.list.map(li=>{
+  if(p.list){
+    const listClass = p.roomEditable ? 'detail-list room-list' : 'detail-list';
+    const listId = p.roomEditable ? ' id="roomList"' : '';
+    listHtml = `<ul class="${listClass}"${listId}>${p.list.map((li,dIdx)=>{
       const m = li.match(/^(\d+)\./);
       const num = m ? m[1] : null;
-      if(num && COURSE_IMAGES[num]){
-        return `<li class="clickable" data-course="${num}">${li}<span class="li-hint">이미지 보기 ›</span></li>`;
+      const hasImage = !!(num && COURSE_IMAGES[num]);
+      const liClass = hasImage ? 'clickable' : '';
+      const dataCourse = hasImage ? ` data-course="${num}"` : '';
+      let inner = `<span class="li-text">${li}</span>`;
+      if(hasImage) inner += `<span class="li-hint">이미지 보기 ›</span>`;
+      if(p.roomEditable){
+        const rKey = dayId + '-' + idx + '-' + dIdx;
+        const room = ROOM_OVERRIDES[rKey] || '';
+        inner += `<span class="room-display">${room || '강의실 미정'}</span><input class="room-input" data-key="${rKey}" value="${room}" placeholder="강의실 입력">`;
       }
-      return `<li>${li}</li>`;
+      return `<li class="${liClass}"${dataCourse}>${inner}</li>`;
     }).join('')}</ul>`;
   }
   const noteHtml = p.note ? `<p class="detail-note">${p.note}</p>` : '';
@@ -2944,7 +2945,10 @@ function openDetail(dayId, idx){
   renderStubs();
 
   detailFaceEl.querySelectorAll('.detail-list li.clickable').forEach(li=>{
-    li.addEventListener('click', ()=> openImageModal(li.dataset.course));
+    li.addEventListener('click', (e)=>{
+      if(e.target.closest('.room-input')) return;
+      openImageModal(li.dataset.course);
+    });
   });
 
   const detailImageBtn = document.getElementById('detailImageBtn');
